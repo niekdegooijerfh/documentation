@@ -50,12 +50,44 @@ public void OnActivityStopped (Activity activity)
 public override void OnCreate ()
 {
     base.OnCreate ();
-    
+
     App.Initialize ();
-    
+
     suspendHelper = new AutoSuspendHelper (this);
 }
 ```
 
 iOS
+
+For iOS you need to add the following to the AppDelegate
+
+```
+readonly AutoSuspendHelper autoSuspendHelper;
+
+public AppDelegate ()
+{
+	autoSuspendHelper = new AutoSuspendHelper (this);
+}
+
+public override bool FinishedLaunching (UIApplication application, NSDictionary launchOptions)
+{
+	App.Initialize ();
+
+	autoSuspendHelper.FinishedLaunching (application, launchOptions);
+
+	return true;
+}
+
+public override void DidEnterBackground (UIApplication application)
+{
+	autoSuspendHelper.DidEnterBackground (application);
+}
+
+public override void OnActivated (UIApplication application)
+{
+	autoSuspendHelper.OnActivated (application);
+}
+```
+
+
 
