@@ -20,6 +20,7 @@
     * [WhenAny](user-guide/when-any/index.md)
     * [View Models](user-guide/view-models/index.md)
         * [Data Suspension](user-guide/data-suspension/index.md)
+        * [AutoSuspendHelper](user-guide/data-suspension/autosuspendhelper.md)
     * [Views](user-guide/views/index.md)
         * [View Location](user-guide/views/view-location.md)
         * [Design Time](user-guide/design-time/index.md)
