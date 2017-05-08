@@ -137,5 +137,9 @@ public override void OnActivated (UIApplication application)
 }
 ```
 
-
+## Retrieving the appstate
+When you want to store or retrieve data you can get the AppState object with the following code
+```
+var appState = RxApp.SuspensionHost.GetAppState<AppState> ();
+```
 
