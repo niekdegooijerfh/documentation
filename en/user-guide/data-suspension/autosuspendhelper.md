@@ -1,14 +1,62 @@
 # AutoSuspendHelper
 
-The AutoSuspendHelper can help you in persisting your AppState.
+The AutoSuspendHelper can help you in persisting your AppState. In this example i create a AppState that generates a random new Guid and persists it. So every App installation has unique key persisted.
 
-Usage
+## Usage
 
-To implement it you'l need to
+There are several steps in creating a AppState. You need to have a object for the AppState itself. You need a SuspensionDriver to persist the data. Then you need to wire it all together.
 
-PCL/General
+### SuspensionDriver
 
-Android
+I used a implementation that uses Akavache for its persistense. The SuspensionDriver is platform independent
+
+```
+public class AkavacheSuspensionDriver<TAppState> : ISuspensionDriver where TAppState : class
+{
+	const string appStateKey = "appState";
+
+
+	public IObservable<Unit> InvalidateState ()
+	{
+		return BlobCache.UserAccount.InvalidateObject<TAppState> (appStateKey);
+	}
+
+	public IObservable<object> LoadState ()
+	{
+		return BlobCache.UserAccount.GetObject<TAppState> (appStateKey);
+	}
+
+	public IObservable<Unit> SaveState (object state)
+	{
+		return BlobCache.UserAccount.InsertObject (appStateKey, (TAppState)state);
+	}
+}
+```
+
+### AppState
+
+The AppState is a object with Newtonsoft.Json notations The AppState is platform independent
+
+```
+[JsonObject]
+public class AppState
+{
+	public string AuthToken = Guid.NewGuid ().ToString ();
+}
+```
+
+### Wiring it together
+
+#### Platform independent
+
+You need to assign a function that creates a new AppState when there is none persisted. And the driver that is used for persistence.
+
+```
+RxApp.SuspensionHost.CreateNewAppState = () => new AppState ();
+RxApp.SuspensionHost.SetupDefaultSuspendResume (new AkavacheSuspensionDriver<AppState> ());
+```
+
+#### Android
 
 For Android you need to implement the `Android.App.Application.IActivityLifecycleCallbacks` interface. Then add the following to the Application class
 
@@ -57,7 +105,7 @@ public override void OnCreate ()
 }
 ```
 
-iOS
+#### iOS
 
 For iOS you need to add the following to the AppDelegate
 
@@ -66,26 +114,26 @@ readonly AutoSuspendHelper autoSuspendHelper;
 
 public AppDelegate ()
 {
-	autoSuspendHelper = new AutoSuspendHelper (this);
+    autoSuspendHelper = new AutoSuspendHelper (this);
 }
 
 public override bool FinishedLaunching (UIApplication application, NSDictionary launchOptions)
 {
-	App.Initialize ();
+    App.Initialize ();
 
-	autoSuspendHelper.FinishedLaunching (application, launchOptions);
+    autoSuspendHelper.FinishedLaunching (application, launchOptions);
 
-	return true;
+    return true;
 }
 
 public override void DidEnterBackground (UIApplication application)
 {
-	autoSuspendHelper.DidEnterBackground (application);
+    autoSuspendHelper.DidEnterBackground (application);
 }
 
 public override void OnActivated (UIApplication application)
 {
-	autoSuspendHelper.OnActivated (application);
+    autoSuspendHelper.OnActivated (application);
 }
 ```
 
