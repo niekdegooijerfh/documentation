@@ -49,7 +49,7 @@ public class AppState
 
 #### Platform independent
 
-You need to assign a function that creates a new AppState when there is none persisted. And the driver that is used for persistence.
+You need to assign a function that creates a new AppState when there is none persisted. And the driver that is used for persistence. This can be done in the PCL for example. Or if it's a application for one platform in the application startup code.
 
 ```
 RxApp.SuspensionHost.CreateNewAppState = () => new AppState ();
@@ -99,9 +99,10 @@ public override void OnCreate ()
 {
     base.OnCreate ();
 
-    App.Initialize ();
-
     suspendHelper = new AutoSuspendHelper (this);
+
+    RxApp.SuspensionHost.CreateNewAppState = () => new AppState ();
+    RxApp.SuspensionHost.SetupDefaultSuspendResume (new AkavacheSuspensionDriver<AppState> ());
 }
 ```
 
@@ -119,7 +120,8 @@ public AppDelegate ()
 
 public override bool FinishedLaunching (UIApplication application, NSDictionary launchOptions)
 {
-    App.Initialize ();
+    RxApp.SuspensionHost.CreateNewAppState = () => new AppState ();
+    RxApp.SuspensionHost.SetupDefaultSuspendResume (new AkavacheSuspensionDriver<AppState> ());
 
     autoSuspendHelper.FinishedLaunching (application, launchOptions);
 
